@@ -9,9 +9,9 @@
 - [Создание потоков](#создание-потоков)
 - [Запуск потоков](#запуск-потоков)
 - [Пакет java.util.concurrent](#пакет-javautilconcurrent)
+  - [Состав пакета java.util.concurrent](#состав-пакета-javautilconcurrent)
 - [Что такое Future](#что-такое-future)
-- [CompletableFuture](#completablefuture)
-- [ForkJoinPool vs ExecutorService](#forkjoinpool-vs-executorservice)
+- [Что такое CompletableFuture](#что-такое-completablefuture)
 - [Планировщики потоков](#планировщики-потоков)
   - [FixedThreadPool](#fixedthreadpool)
   - [CachedThreadPool](#cachedthreadpool)
@@ -19,6 +19,21 @@
   - [SingleThreadScheduledExecutor](#singlethreadscheduledexecutor)
   - [ScheduledThreadPool](#scheduledthreadpool)
   - [WorkStealingPool](#workstealingpool)
+- [ForkJoinPool vs ExecutorService](#forkjoinpool-vs-executorservice)
+- [Locks](#locks)
+- [Locks vs Synchronized](#locks-vs-synchronized)
+  - [В чем отличие Locks от Syncronized?](#в-чем-отличие-locks-от-syncronized)
+  - [Когда что использовать?](#когда-что-использовать)
+  - [Примеры](#примеры)
+    - [Пример использования Syncronized:](#пример-использования-syncronized)
+    - [Пример 2 использования Syncronized:](#пример-2-использования-syncronized)
+    - [Пример 3 использования Syncronized:](#пример-3-использования-syncronized)
+  - [Так что же такое монитор?](#так-что-же-такое-монитор)
+  - [Что такое мьютекс?](#что-такое-мьютекс)
+  - [Как происходит блокировка?](#как-происходит-блокировка)
+  - [Что такое получить монитор?](#что-такое-получить-монитор)
+- [Concurrent collections](#concurrent-collections)
+  - [ConcurrentHashMap](#concurrenthashmap)
 
 ## Потоки в Java
 
@@ -142,7 +157,13 @@ public class Main {
 
 Это более продвинутые классы для работы с потоками, чем классы Thread и Runnable.
 
-Примеры кода для работы с потоками из пакета java.util.concurrent:
+### Состав пакета java.util.concurrent
+
+Пакет java.util.concurrent содержит следующие классы:
+- Atomics
+- Concurrent collections
+- [Executors (thread pools)](#forkjoinpool-vs-executorservice)
+- Locks
 
 Пример запуска потока с помощью класса ExecutorService:
 
@@ -219,7 +240,7 @@ public class Main {
 
 [Потоки в Java]: https://metanit.com/java/tutorial/8.1.php
 
-## CompletableFuture
+## Что такое CompletableFuture
 
 CompletableFuture - это класс, который представляет собой результат выполнения потока.
 CompletableFuture позволяет получить результат выполнения потока, проверить завершился ли поток, отменить поток.
@@ -284,62 +305,6 @@ public class Main {
     }
 }
 ```
-
-## ForkJoinPool vs ExecutorService
-
-ForkJoinPool - это класс, который представляет собой пул потоков.
-ForkJoinPool позволяет выполнять асинхронные задачи, которые могут зависеть друг от друга.
-ForkJoinPool позволяет выполнять задачи с помощью ForkJoinTask.
-
-ExecutorService - это класс, который представляет собой пул потоков.
-ExecutorService позволяет выполнять асинхронные задачи, которые могут зависеть друг от друга.
-ExecutorService позволяет выполнять задачи с помощью Future.
-
-Пример использования ForkJoinPool:
-
-```java
-
-public class Main {
-    public static void main(String[] args) throws ExecutionException, InterruptedException {
-        ForkJoinPool forkJoinPool = new ForkJoinPool();
-        ForkJoinTask<String> forkJoinTask = forkJoinPool.submit(() -> {
-            System.out.println("Hello from ForkJoinPool!");
-            return "Hello from ForkJoinPool!";
-        });
-        String result = forkJoinTask.get();
-        System.out.println(result);
-        forkJoinPool.shutdown();
-    }
-}
-```
-
-Пример использования ExecutorService:
-
-```java
-
-public class Main {
-    public static void main(String[] args) throws ExecutionException, InterruptedException {
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
-        Future<String> future = executorService.submit(() -> {
-            System.out.println("Hello from ExecutorService!");
-            return "Hello from ExecutorService!";
-        });
-        String result = future.get();
-        System.out.println(result);
-        executorService.shutdown();
-    }
-}
-```
-
-В чем отличие ForkJoinPool от ExecutorService?
-
-1. ForkJoinPool позволяет выполнять задачи с помощью ForkJoinTask, а ExecutorService позволяет выполнять задачи с помощью Future.
-2. ForkJoinPool позволяет выполнять задачи, которые могут зависеть друг от друга, а ExecutorService позволяет выполнять задачи, которые не зависят друг от друга.
-
-Когда что использовать?
-
-1. ForkJoinPool лучше использовать для выполнения задач, которые могут зависеть друг от друга.
-2. ExecutorService лучше использовать для выполнения задач, которые не зависят друг от друга.
 
 ## Планировщики потоков
 
@@ -508,3 +473,209 @@ public class Main {
     }
 }
 ```
+
+
+## ForkJoinPool vs ExecutorService
+
+ForkJoinPool - это класс, который представляет собой пул потоков.
+ForkJoinPool позволяет выполнять асинхронные задачи, которые могут зависеть друг от друга.
+ForkJoinPool позволяет выполнять задачи с помощью ForkJoinTask.
+
+ExecutorService - это класс, который представляет собой пул потоков.
+ExecutorService позволяет выполнять асинхронные задачи, которые могут зависеть друг от друга.
+ExecutorService позволяет выполнять задачи с помощью Future.
+
+Пример использования ForkJoinPool:
+
+```java
+
+public class Main {
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+        ForkJoinPool forkJoinPool = new ForkJoinPool();
+        ForkJoinTask<String> forkJoinTask = forkJoinPool.submit(() -> {
+            System.out.println("Hello from ForkJoinPool!");
+            return "Hello from ForkJoinPool!";
+        });
+        String result = forkJoinTask.get();
+        System.out.println(result);
+        forkJoinPool.shutdown();
+    }
+}
+```
+
+Пример использования ExecutorService:
+
+```java
+
+public class Main {
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        Future<String> future = executorService.submit(() -> {
+            System.out.println("Hello from ExecutorService!");
+            return "Hello from ExecutorService!";
+        });
+        String result = future.get();
+        System.out.println(result);
+        executorService.shutdown();
+    }
+}
+```
+
+В чем отличие ForkJoinPool от ExecutorService?
+
+1. ForkJoinPool позволяет выполнять задачи с помощью ForkJoinTask, а ExecutorService позволяет выполнять задачи с помощью Future.
+2. ForkJoinPool позволяет выполнять задачи, которые могут зависеть друг от друга, а ExecutorService позволяет выполнять задачи, которые не зависят друг от друга.
+
+Когда что использовать?
+
+1. ForkJoinPool лучше использовать для выполнения задач, которые могут зависеть друг от друга.
+2. ExecutorService лучше использовать для выполнения задач, которые не зависят друг от друга.
+
+## Locks
+
+Locks - это классы, которые позволяют синхронизировать потоки.
+Locks позволяют синхронизировать потоки с помощью блокировок.
+
+Пример использования Locks:
+
+```java
+
+public class Main {
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+        Lock lock = new ReentrantLock();
+        lock.lock();
+        try {
+            System.out.println("Hello from Locks!");
+        } finally {
+            lock.unlock();
+        }
+    }
+}
+```
+
+## Locks vs Synchronized
+
+Syncronized - это ключевое слово, которое позволяет синхронизировать потоки.
+Syncronized позволяет синхронизировать потоки с помощью монитора.
+
+Locks - это классы, которые позволяют синхронизировать потоки.
+Locks позволяют синхронизировать потоки с помощью блокировок.
+
+### В чем отличие Locks от Syncronized?
+
+1. Locks позволяет синхронизировать потоки с помощью блокировок, а Syncronized позволяет синхронизировать потоки с помощью монитора.
+2. Locks позволяет синхронизировать потоки, которые могут зависеть друг от друга, а Syncronized позволяет синхронизировать потоки, которые не зависят друг от друга.
+3. Locks позволяет синхронизировать потоки, которые могут выбрасывать исключения, а Syncronized позволяет синхронизировать потоки, которые не могут выбрасывать исключения.
+
+### Когда что использовать?
+
+1. Locks лучше использовать для синхронизации потоков, которые могут зависеть друг от друга.
+2. Syncronized лучше использовать для синхронизации потоков, которые не зависят друг от друга.
+3. Locks лучше использовать для синхронизации потоков, которые могут выбрасывать исключения.
+
+При синхронизации потоков с помощью Locks нужно всегда использовать блок try-finally.
+
+### Примеры
+
+#### Пример использования Syncronized:
+
+```java
+
+public class Main {
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+        synchronized (Main.class) {
+            System.out.println("В данном случае монитором является класс Main");
+            System.out.println("Не самый лучший вариант синхронизации потоков");
+            System.out.println("Потому что в данном случае синхронизируются все потоки (класс то всего 1)");
+        }
+    }
+}
+```
+
+#### Пример 2 использования Syncronized:
+
+```java
+
+public class Main {
+    private static final Object monitor = new Object();
+
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+        synchronized (monitor) {
+            System.out.println("В данном случае монитором является объект Object");
+            System.out.println("Пример не чильно лучше чем первый пример");
+            System.out.println("Потому что в данном случае синхронизируются также все потоки (объект то в static создан)");
+        }
+    }
+}
+```
+
+#### Пример 3 использования Syncronized:
+
+```java
+
+public class Main {
+    private final Object monitor = new Object();
+
+    public void doSomething() throws ExecutionException, InterruptedException {
+        synchronized (monitor) {
+            System.out.println("В данном случае монитором является объект Object");
+            System.out.println("Пример лучше чем первый и второй пример");
+            System.out.println("Потому что в данном случае синхронизируются только потоки, которые работают с данным объектом");
+        }
+    }
+}   
+```
+
+### Так что же такое монитор?
+
+Монитор - это объект, который используется для синхронизации и блокировки потоков.
+Это просто любая ссылка как на класс так и на объект. Не важно new Object() или new String() или что то еще. 
+Главное чтобы он был.
+
+### Что такое мьютекс?
+
+Мьютекс - это объект, который используется для синхронизации и блокировки потоков.
+Мьютекс - это просто другое название монитора.
+
+### Как происходит блокировка?
+
+При блокировке потоки пытаются получить монитор.
+Если монитор свободен, то потоки получают монитор и выполняют свою работу.
+Если монитор занят, то потоки ждут пока монитор освободится.
+
+### Что такое получить монитор?
+
+Получить монитор - это значит получить ссылку на объект, который используется для синхронизации и блокировки потоков.
+
+## Concurrent collections
+
+Concurrent collections - это классы, которые позволяют работать с коллекциями в многопоточной среде.
+В основе работы concurrent collections лежит блокировка.
+
+Наиболее используемые коллекции
+
+- ConcurrentHashMap
+- ConcurrentLinkedQueue
+- ConcurrentSkipListMap
+- ConcurrentSkipListSet
+- CopyOnWriteArrayList
+- CopyOnWriteArraySet
+
+### ConcurrentHashMap
+
+ConcurrentHashMap - это класс, который представляет собой коллекцию.
+Это привычная нам коллекция Map, которая позволяет хранить данные в виде ключ-значение.
+Но работать она может в многопоточной среде. Почему? Потому что в основе работы ConcurrentHashMap лежит блокировка.
+
+Блокировка работает следующим образом:
+
+1. При добавлении элемента в ConcurrentHashMap блокируется только та часть коллекции, в которую добавляется элемент.
+2. При удалении элемента из ConcurrentHashMap блокируется только та часть коллекции, из которой удаляется элемент.
+3. При получении элемента из ConcurrentHashMap блокируется только та часть коллекции, из которой получается элемент.
+4. При обновлении элемента в ConcurrentHashMap блокируется только та часть коллекции, в которую обновляется элемент.
+
+и т.д.
+
+Пример использования ConcurrentHashMap:
+
+// TODO: Еще не доделал. Допишу....
